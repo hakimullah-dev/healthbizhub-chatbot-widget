@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthBizHub AI Chat</title>
+  <link rel="stylesheet" href="./widget.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111820; }
+
+    :root {
+      --hbh-primary: #00BCD4;
+      --hbh-primary-dark: #0097A7;
+      --hbh-secondary: #F5A623;
+      --hbh-dark: #1a2332;
+      --hbh-dark-2: #243447;
+      --hbh-dark-3: #2d3f55;
+      --hbh-text: #e8edf2;
+      --hbh-text-muted: #8fa3b8;
+      --hbh-border: rgba(255,255,255,0.08);
+      --hbh-radius: 16px;
+      --hbh-radius-sm: 10px;
+      --hbh-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .hbh-page-wrapper {
+      min-height: 100vh;
+      background: #111820;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .hbh-page-container {
+      width: 100%;
+      max-width: 480px;
+      height: calc(100vh - 40px);
+      max-height: 760px;
+      background: var(--hbh-dark);
+      border-radius: var(--hbh-radius);
+      box-shadow: var(--hbh-shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .hbh-header {
+      background: linear-gradient(135deg, var(--hbh-dark-2), var(--hbh-dark-3));
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--hbh-border);
+      flex-shrink: 0;
+    }
+    .hbh-header-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--hbh-primary), var(--hbh-primary-dark));
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .hbh-header-avatar svg { width: 22px; height: 22px; fill: white; }
+    .hbh-header-info { flex: 1; }
+    .hbh-header-name { font-weight: 700; font-size: 15px; color: var(--hbh-text); line-height: 1.2; }
+    .hbh-header-status { font-size: 12px; color: var(--hbh-primary); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .hbh-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4CAF50; animation: hbh-pulse 2s infinite; }
+    @keyframes hbh-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .hbh-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth;
+    }
+    .hbh-messages::-webkit-scrollbar { width: 4px; }
+    .hbh-messages::-webkit-scrollbar-thumb { background: var(--hbh-dark-3); border-radius: 4px; }
+
+    .hbh-msg { display: flex; flex-direction: column; max-width: 85%; animation: hbh-fadein 0.3s ease; }
+    @keyframes hbh-fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .hbh-msg.user { align-self: flex-end; }
+    .hbh-msg.bot  { align-self: flex-start; }
+    .hbh-msg-bubble { padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; }
+    .hbh-msg.user .hbh-msg-bubble { background: linear-gradient(135deg, var(--hbh-primary), var(--hbh-primary-dark)); color: white; border-bottom-right-radius: 4px; }
+    .hbh-msg.bot  .hbh-msg-bubble { background: var(--hbh-dark-2); color: var(--hbh-text); border-bottom-left-radius: 4px; border: 1px solid var(--hbh-border); }
+    .hbh-msg-time { font-size: 10px; color: var(--hbh-text-muted); margin-top: 4px; padding: 0 4px; }
+    .hbh-msg.user .hbh-msg-time { text-align: right; }
+
+    .hbh-cards-wrap { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 340px; }
+    .hbh-card { background: var(--hbh-dark-2); border: 1px solid var(--hbh-border); border-radius: var(--hbh-radius-sm); overflow: hidden; transition: border-color 0.2s; }
+    .hbh-card:hover { border-color: var(--hbh-primary); }
+    .hbh-card-img { width: 100%; height: 140px; object-fit: cover; background: var(--hbh-dark-3); display: block; }
+    .hbh-card-img-placeholder { width:100%; height:140px; background: linear-gradient(135deg,var(--hbh-dark-2),var(--hbh-dark-3)); display:flex; align-items:center; justify-content:center; }
+    .hbh-card-img-placeholder svg { width:40px; height:40px; opacity:0.3; fill:var(--hbh-text); }
+    .hbh-card-body { padding: 12px; }
+    .hbh-card-title { font-weight: 700; font-size: 14px; color: var(--hbh-text); margin-bottom: 4px; }
+    .hbh-card-meta { font-size: 12px; color: var(--hbh-text-muted); display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+    .hbh-card-desc { font-size: 12px; color: var(--hbh-text-muted); line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .hbh-badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+    .hbh-badge-verified { background: rgba(76,175,80,0.15); color: #4CAF50; }
+    .hbh-badge-featured { background: rgba(245,166,35,0.15); color: var(--hbh-secondary); }
+    .hbh-card-link { display: block; text-align: center; padding: 7px; background: rgba(0,188,212,0.1); color: var(--hbh-primary); text-decoration: none; font-size: 12px; font-weight: 600; border-top: 1px solid var(--hbh-border); transition: background 0.2s; }
+    .hbh-card-link:hover { background: rgba(0,188,212,0.2); }
+
+    .hbh-cats { display: flex; flex-wrap: wrap; gap: 8px; max-width: 320px; }
+    .hbh-cat-btn { padding: 7px 12px; background: var(--hbh-dark-2); border: 1px solid var(--hbh-border); border-radius: 20px; color: var(--hbh-text); font-size: 13px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .hbh-cat-btn:hover { background: var(--hbh-primary); border-color: var(--hbh-primary); color: white; }
+    .hbh-cat-count { font-size: 11px; color: var(--hbh-text-muted); margin-left: 4px; }
+
+    .hbh-slider { width: 100%; max-width: 320px; }
+    .hbh-slider-track { overflow: hidden; border-radius: var(--hbh-radius-sm); }
+    .hbh-slider-img { width: 100%; height: 200px; object-fit: cover; border-radius: var(--hbh-radius-sm); display: block; }
+    .hbh-slider-caption { font-size: 12px; color: var(--hbh-text-muted); text-align: center; margin-top: 6px; padding: 0 4px; }
+    .hbh-slider-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; }
+    .hbh-slider-btn { background: var(--hbh-dark-2); border: 1px solid var(--hbh-border); color: var(--hbh-text); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+    .hbh-slider-btn:hover { background: var(--hbh-primary); border-color: var(--hbh-primary); }
+    .hbh-slider-counter { font-size: 12px; color: var(--hbh-text-muted); }
+
+    .hbh-testimonials { display: flex; flex-direction: column; gap: 8px; max-width: 320px; }
+    .hbh-testimonial { background: var(--hbh-dark-2); border: 1px solid var(--hbh-border); border-left: 3px solid var(--hbh-secondary); border-radius: var(--hbh-radius-sm); padding: 10px 12px; }
+    .hbh-testimonial-title { font-weight: 600; font-size: 13px; color: var(--hbh-secondary); margin-bottom: 4px; }
+    .hbh-testimonial-text { font-size: 12px; color: var(--hbh-text-muted); line-height: 1.4; margin-bottom: 6px; }
+    .hbh-testimonial-link { font-size: 11px; color: var(--hbh-primary); text-decoration: none; }
+    .hbh-testimonial-link:hover { text-decoration: underline; }
+
+    .hbh-links { display: flex; flex-direction: column; gap: 6px; max-width: 280px; }
+    .hbh-link-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--hbh-dark-2); border: 1px solid var(--hbh-border); border-radius: var(--hbh-radius-sm); text-decoration: none; transition: border-color 0.2s; }
+    .hbh-link-item:hover { border-color: var(--hbh-primary); }
+    .hbh-link-platform { font-size: 13px; font-weight: 600; color: var(--hbh-text); }
+    .hbh-link-url { font-size: 11px; color: var(--hbh-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .hbh-post-types { display: flex; flex-direction: column; gap: 6px; max-width: 280px; }
+    .hbh-post-type-btn { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--hbh-dark-2); border: 1px solid var(--hbh-border); border-radius: var(--hbh-radius-sm); color: var(--hbh-text); font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: left; }
+    .hbh-post-type-btn:hover { background: var(--hbh-dark-3); border-color: var(--hbh-primary); }
+    .hbh-post-type-count { font-size: 11px; color: var(--hbh-text-muted); background: var(--hbh-dark-3); padding: 2px 7px; border-radius: 10px; }
+
+    .hbh-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 8px; flex-shrink: 0; }
+    .hbh-suggestion { padding: 6px 12px; background: rgba(0,188,212,0.08); border: 1px solid rgba(0,188,212,0.2); border-radius: 20px; color: var(--hbh-primary); font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .hbh-suggestion:hover { background: rgba(0,188,212,0.18); }
+
+    .hbh-input-area { padding: 12px 16px; border-top: 1px solid var(--hbh-border); background: var(--hbh-dark-2); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+    .hbh-input { flex: 1; background: var(--hbh-dark-3); border: 1px solid var(--hbh-border); border-radius: 20px; padding: 10px 14px; color: var(--hbh-text); font-size: 14px; outline: none; resize: none; max-height: 80px; font-family: inherit; line-height: 1.4; transition: border-color 0.2s; }
+    .hbh-input:focus { border-color: var(--hbh-primary); }
+    .hbh-input::placeholder { color: var(--hbh-text-muted); }
+    .hbh-send-btn { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--hbh-primary), var(--hbh-primary-dark)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s, box-shadow 0.15s; }
+    .hbh-send-btn:hover { transform: scale(1.05); box-shadow: 0 3px 12px rgba(0,188,212,0.4); }
+    .hbh-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .hbh-send-btn svg { width: 18px; height: 18px; fill: white; }
+
+    .hbh-typing { display: flex; gap: 4px; align-items: center; padding: 10px 14px; background: var(--hbh-dark-2); border: 1px solid var(--hbh-border); border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; }
+    .hbh-typing span { width: 6px; height: 6px; background: var(--hbh-text-muted); border-radius: 50%; animation: hbh-bounce 1.2s infinite; }
+    .hbh-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .hbh-typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes hbh-bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+    @media (max-width: 520px) {
+      .hbh-page-wrapper { padding: 0; }
+      .hbh-page-container { height: 100vh; max-height: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hbh-page-wrapper">
+    <div class="hbh-page-container">
+      <div class="hbh-header">
+        <div class="hbh-header-avatar">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        </div>
+        <div class="hbh-header-info">
+          <div class="hbh-header-name">HealthBizHub AI</div>
+          <div class="hbh-header-status"><span class="hbh-status-dot"></span>Online &bull; 141+ businesses</div>
+        </div>
+      </div>
+
+      <div class="hbh-messages" id="hbh-messages"></div>
+      <div class="hbh-suggestions" id="hbh-suggestions"></div>
+
+      <div class="hbh-input-area">
+        <textarea class="hbh-input" id="hbh-input" placeholder="Ask about health businesses..." rows="1"></textarea>
+        <button class="hbh-send-btn" id="hbh-send" aria-label="Send">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <script src="./widget.js"></script>
+  <script>
+    var WEBHOOK_URL = 'http://82.25.104.70:5678/webhook/healthbizhub-chat';
+    var sessionId = 'hbh_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    var isTyping = false;
+
+    function init() {
+      document.getElementById('hbh-send').addEventListener('click', sendMessage);
+      document.getElementById('hbh-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+      });
+      document.getElementById('hbh-input').addEventListener('input', autoResize);
+      addBotMessage({
+        response_type: 'text',
+        message: 'Hi! I\'m the HealthBizHub AI assistant. I can help you find health businesses, browse categories, view photos, testimonials, and more. What are you looking for?',
+        suggestions: ['Browse all categories', 'Find nutrition businesses', 'Show featured businesses', 'How does HealthBizHub work?']
+      });
+    }
+
+    function autoResize() {
+      var ta = document.getElementById('hbh-input');
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 80) + 'px';
+    }
+
+    function sendMessage() {
+      if (isTyping) return;
+      var input = document.getElementById('hbh-input');
+      var text = input.value.trim();
+      if (!text) return;
+      addUserMessage(text);
+      input.value = '';
+      input.style.height = 'auto';
+      clearSuggestions();
+      showTyping();
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, session_id: sessionId })
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(data) { hideTyping(); addBotMessage(data); })
+        .catch(function(err) {
+          hideTyping();
+          addBotMessage({ response_type: 'text', message: 'Sorry, I couldn\'t connect. Please try again.', suggestions: ['Browse all categories', 'Search businesses'] });
+        });
+    }
+
+    function addUserMessage(text) {
+      var c = document.getElementById('hbh-messages');
+      var d = document.createElement('div');
+      d.className = 'hbh-msg user';
+      d.innerHTML = '<div class="hbh-msg-bubble">' + esc(text) + '</div><div class="hbh-msg-time">' + getTime() + '</div>';
+      c.appendChild(d); scrollBottom();
+    }
+
+    function addBotMessage(data) {
+      var c = document.getElementById('hbh-messages');
+      var w = document.createElement('div');
+      w.className = 'hbh-msg bot';
+      var bubble = document.createElement('div');
+      bubble.className = 'hbh-msg-bubble';
+      if (data.message) {
+        var p = document.createElement('p');
+        p.style.margin = '0 0 8px 0';
+        p.textContent = data.message;
+        bubble.appendChild(p);
+      }
+      var rich = buildRich(data);
+      if (rich) bubble.appendChild(rich);
+      w.appendChild(bubble);
+      var t = document.createElement('div');
+      t.className = 'hbh-msg-time';
+      t.textContent = getTime();
+      w.appendChild(t);
+      c.appendChild(w);
+      if (data.suggestions && data.suggestions.length) showSuggestions(data.suggestions);
+      scrollBottom();
+    }
+
+    function buildRich(data) {
+      var type = data.response_type, items = data.items || [];
+      if (!items.length && type !== 'text') return null;
+      if (type === 'cards') return buildCards(items);
+      if (type === 'category_picker') return buildCats(items);
+      if (type === 'image_slider') return buildSlider(items);
+      if (type === 'testimonial_cards') return buildTestimonials(items);
+      if (type === 'links') return buildLinks(items);
+      if (type === 'post_type_picker') return buildPostTypes(items, data);
+      return null;
+    }
+
+    function buildCards(items) {
+      var w = document.createElement('div'); w.className = 'hbh-cards-wrap';
+      items.slice(0,8).forEach(function(item) {
+        var card = document.createElement('div'); card.className = 'hbh-card';
+        var imgHtml = item.photo_url
+          ? '<img class="hbh-card-img" src="' + escA(item.photo_url) + '" alt="' + escA(item.business_name||'') + '" onerror="this.style.display=\'none\'">'
+          : '<div class="hbh-card-img-placeholder"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2 3 3-4 4 5z"/></svg></div>';
+        var badges = (item.is_verified ? '<span class="hbh-badge hbh-badge-verified">✓ Verified</span>' : '') + (item.is_featured ? '<span class="hbh-badge hbh-badge-featured">★ Featured</span>' : '');
+        card.innerHTML = imgHtml +
+          '<div class="hbh-card-body">' +
+            '<div class="hbh-card-title">' + esc(item.business_name||'') + '</div>' +
+            '<div class="hbh-card-meta">' + (item.category ? '<span>'+esc(item.category)+'</span>' : '') + (item.location ? '<span>📍 '+esc(item.location)+'</span>' : '') + '</div>' +
+            (badges ? '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">'+badges+'</div>' : '') +
+            (item.description ? '<div class="hbh-card-desc">'+esc(item.description)+'</div>' : '') +
+          '</div>' +
+          (item.profile_url ? '<a class="hbh-card-link" href="'+escA(item.profile_url)+'" target="_blank" rel="noopener">View Profile →</a>' : '');
+        w.appendChild(card);
+      });
+      return w;
+    }
+
+    function buildCats(items) {
+      var w = document.createElement('div'); w.className = 'hbh-cats';
+      items.forEach(function(item) {
+        var btn = document.createElement('button'); btn.className = 'hbh-cat-btn';
+        btn.innerHTML = esc(item.label||item.value||'') + (item.count ? '<span class="hbh-cat-count">('+item.count+')</span>' : '');
+        btn.addEventListener('click', function() { document.getElementById('hbh-input').value = 'Show businesses in '+(item.label||item.value); sendMessage(); });
+        w.appendChild(btn);
+      });
+      return w;
+    }
+
+    function buildSlider(items) {
+      if (!items.length) return null;
+      var idx = 0;
+      var w = document.createElement('div'); w.className = 'hbh-slider';
+      var track = document.createElement('div'); track.className = 'hbh-slider-track';
+      var img = document.createElement('img'); img.className = 'hbh-slider-img';
+      var caption = document.createElement('div'); caption.className = 'hbh-slider-caption';
+      var counter = document.createElement('span'); counter.className = 'hbh-slider-counter';
+      function show(i) {
+        idx = (i + items.length) % items.length;
+        img.src = items[idx].image_url || ''; img.alt = items[idx].title || '';
+        caption.textContent = (items[idx].title||'') + (items[idx].description ? ' — '+items[idx].description.substring(0,60) : '');
+        counter.textContent = (idx+1)+' / '+items.length;
+      }
+      track.appendChild(img);
+      var controls = document.createElement('div'); controls.className = 'hbh-slider-controls';
+      var prev = document.createElement('button'); prev.className = 'hbh-slider-btn'; prev.textContent = '‹';
+      var next = document.createElement('button'); next.className = 'hbh-slider-btn'; next.textContent = '›';
+      prev.addEventListener('click', function() { show(idx-1); });
+      next.addEventListener('click', function() { show(idx+1); });
+      controls.appendChild(prev); controls.appendChild(counter); controls.appendChild(next);
+      w.appendChild(track); w.appendChild(caption);
+      if (items.length > 1) w.appendChild(controls);
+      show(0); return w;
+    }
+
+    function buildTestimonials(items) {
+      var w = document.createElement('div'); w.className = 'hbh-testimonials';
+      items.slice(0,10).forEach(function(item) {
+        var el = document.createElement('div'); el.className = 'hbh-testimonial';
+        el.innerHTML = '<div class="hbh-testimonial-title">'+esc(item.title||'Customer Review')+'</div>' +
+          '<div class="hbh-testimonial-text">'+esc((item.excerpt||'').substring(0,200))+'</div>' +
+          (item.detail_url ? '<a class="hbh-testimonial-link" href="'+escA(item.detail_url)+'" target="_blank" rel="noopener">Read more →</a>' : '');
+        w.appendChild(el);
+      });
+      return w;
+    }
+
+    function buildLinks(items) {
+      var w = document.createElement('div'); w.className = 'hbh-links';
+      items.forEach(function(item) {
+        var a = document.createElement('a'); a.className = 'hbh-link-item';
+        a.href = item.url||'#'; a.target = '_blank'; a.rel = 'noopener';
+        a.innerHTML = '<span class="hbh-link-platform">'+esc(item.platform||'')+'</span><span class="hbh-link-url">'+esc(item.url||'')+'</span>';
+        w.appendChild(a);
+      });
+      return w;
+    }
+
+    function buildPostTypes(items, data) {
+      var bizName = data.business_name || '';
+      var w = document.createElement('div'); w.className = 'hbh-post-types';
+      items.forEach(function(item) {
+        var btn = document.createElement('button'); btn.className = 'hbh-post-type-btn';
+        btn.innerHTML = esc(item.label||item.value||'') + (item.count ? '<span class="hbh-post-type-count">'+item.count+'</span>' : '');
+        btn.addEventListener('click', function() { document.getElementById('hbh-input').value = 'Show '+(item.label||item.value)+(bizName?' from '+bizName:''); sendMessage(); });
+        w.appendChild(btn);
+      });
+      return w;
+    }
+
+    function showSuggestions(list) {
+      var c = document.getElementById('hbh-suggestions'); c.innerHTML = '';
+      list.slice(0,4).forEach(function(s) {
+        var btn = document.createElement('button'); btn.className = 'hbh-suggestion'; btn.textContent = s;
+        btn.addEventListener('click', function() { document.getElementById('hbh-input').value = s; sendMessage(); });
+        c.appendChild(btn);
+      });
+    }
+    function clearSuggestions() { document.getElementById('hbh-suggestions').innerHTML = ''; }
+
+    function showTyping() {
+      isTyping = true; document.getElementById('hbh-send').disabled = true;
+      var c = document.getElementById('hbh-messages');
+      var d = document.createElement('div'); d.className = 'hbh-msg bot'; d.id = 'hbh-typing-msg';
+      d.innerHTML = '<div class="hbh-typing"><span></span><span></span><span></span></div>';
+      c.appendChild(d); scrollBottom();
+    }
+    function hideTyping() {
+      isTyping = false; document.getElementById('hbh-send').disabled = false;
+      var el = document.getElementById('hbh-typing-msg'); if (el) el.remove();
+    }
+
+    function scrollBottom() { var c = document.getElementById('hbh-messages'); setTimeout(function(){ c.scrollTop = c.scrollHeight; }, 50); }
+    function getTime() { var d = new Date(); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function escA(s) { return esc(s); }
+
+    init();
+  </script>
+</body>
+</html>
