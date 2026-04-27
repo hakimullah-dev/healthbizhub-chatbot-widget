@@ -153,54 +153,60 @@
     }
     .hbh-typing-text { font-size: 12px; color: var(--text-muted); font-style: italic; }
 
-    /* ===== CARDS SLIDER ===== */
-    .cards-slider-wrap { margin-top: 10px; width: 100%; overflow: hidden; border-radius: var(--radius-sm); border: 1.5px solid var(--border); }
-    .cards-track { display: flex; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+    /* ===== CARDS GRID ===== */
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .biz-card {
-      min-width: 100%; width: 100%;
-      background: var(--surface-2);
+      background: #e8f4fb;
+      border: 1.5px solid #c5dff0;
+      border-radius: var(--radius-sm);
       overflow: hidden;
       display: flex; flex-direction: column;
     }
-    .biz-card-img { width: 100%; height: 170px; object-fit: cover; display: block; }
-    .biz-card-img-ph {
-      width: 100%; height: 170px;
-      background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+    .biz-card-top { display: flex; align-items: flex-start; gap: 7px; padding: 10px 10px 4px; }
+    .biz-card-avatar {
+      width: 48px; height: 48px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+      border: 2px solid white; background: #c5d8ea;
       display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
     }
-    .biz-card-img-ph svg { width: 44px; height: 44px; fill: #cbd5e1; }
-    .biz-card-body { padding: 12px 14px; flex: 1; }
-    .biz-card-name { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 5px; line-height: 1.3; }
-    .biz-card-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 3px; margin-bottom: 6px; }
+    .biz-card-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .biz-card-avatar svg { width: 22px; height: 22px; fill: #8aaec8; }
+    .biz-card-meta-top { flex: 1; font-size: 10px; color: #4a6580; text-align: right; line-height: 1.5; word-break: break-word; }
+    .biz-card-meta-top .cat-label { font-weight: 700; color: #2a7aa8; }
+    .biz-card-body { padding: 2px 10px 6px; flex: 1; }
+    .biz-card-name { font-weight: 700; font-size: 12px; color: var(--text); margin-bottom: 3px; line-height: 1.3; }
     .biz-card-desc {
-      font-size: 12px; color: var(--text-muted); line-height: 1.45;
+      font-size: 10px; color: var(--text-muted); line-height: 1.4;
       display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-      margin-bottom: 8px;
     }
-    .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
-    .badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .badges { display: flex; gap: 3px; flex-wrap: wrap; padding: 0 10px 4px; }
+    .badge { padding: 1px 6px; border-radius: 20px; font-size: 9px; font-weight: 700; }
     .badge-verified { background: #dcfce7; color: #16a34a; }
     .badge-featured { background: #fef3c7; color: #d97706; }
     .card-link {
-      display: block; text-align: center; padding: 9px;
-      background: rgba(0,188,212,0.08); color: var(--primary);
-      text-decoration: none; font-size: 12px; font-weight: 700;
-      border-top: 1px solid var(--border); transition: background 0.2s;
+      display: block; text-align: center; padding: 7px;
+      background: white; border: 1.5px solid #c5dff0; border-radius: 6px;
+      margin: 2px 10px 10px; color: #4a6580;
+      text-decoration: none; font-size: 10px; font-weight: 600;
+      transition: all 0.2s;
     }
-    .card-link:hover { background: rgba(0,188,212,0.18); }
+    .card-link:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    .cards-slider-wrap { margin-top: 10px; width: 100%; overflow: hidden; }
+    .cards-track { display: flex; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .cards-slide { min-width: 100%; width: 100%; }
     .cards-nav {
       display: flex; align-items: center; justify-content: center;
       gap: 14px; padding: 8px 0 2px;
     }
     .cards-nav-btn {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 30px; height: 30px; border-radius: 50%;
       border: 1.5px solid var(--border); background: white;
-      color: var(--text); font-size: 18px; cursor: pointer;
+      color: var(--text); font-size: 17px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.2s; line-height: 1;
     }
     .cards-nav-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-    .cards-nav-count { font-size: 12px; color: var(--text-muted); min-width: 44px; text-align: center; }
+    .cards-nav-count { font-size: 11px; color: var(--text-muted); min-width: 40px; text-align: center; }
 
     /* ===== CATEGORY PICKER ===== */
     .hbh-categories { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
@@ -272,21 +278,30 @@
     .link-url { font-size: 11px; color: var(--primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ===== SUB-CATEGORY PICKER ===== */
-    .hbh-sub-categories { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .hbh-sub-categories { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .hbh-spec-btn {
-      padding: 9px 14px; background: white;
-      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-      color: var(--text); font-size: 13px; font-weight: 500;
-      cursor: pointer; transition: all 0.2s; text-align: left;
+      padding: 4px 12px;
+      background: white; border: 1.5px solid var(--border); border-radius: 14px;
+      color: var(--text-muted); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
     }
-    .hbh-spec-btn:hover { background: #f0fbfc; border-color: var(--primary); color: var(--primary-dark); }
+    .hbh-spec-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
     .hbh-show-all-btn {
-      padding: 9px 14px; background: rgba(0,188,212,0.08);
-      border: 1.5px solid var(--primary); border-radius: var(--radius-sm);
-      color: var(--primary-dark); font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: all 0.2s; text-align: left;
+      padding: 4px 12px; background: rgba(0,188,212,0.10);
+      border: 1.5px solid var(--primary); border-radius: 14px;
+      color: var(--primary-dark); font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
     }
     .hbh-show-all-btn:hover { background: var(--primary); color: white; }
+    .hbh-cat-specs-label { font-size: 11px; color: var(--text-muted); padding: 0 14px 4px; font-weight: 600; }
+    .view-all-link {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin-top: 10px; padding: 9px 14px;
+      background: white; border: 1.5px solid var(--primary); border-radius: var(--radius-sm);
+      color: var(--primary-dark); font-size: 12px; font-weight: 700;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .view-all-link:hover { background: var(--primary); color: white; }
 
     /* ===== POST TYPE PICKER ===== */
     .post-types-wrap { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
@@ -483,7 +498,22 @@
     function buildRich(data) {
       var type = data.response_type;
       var items = data.items || [];
-      if (type === 'cards') return renderCards(items);
+      if (type === 'cards') {
+        var wrap = document.createElement('div');
+        var cardsEl = renderCards(items);
+        if (cardsEl) wrap.appendChild(cardsEl);
+        if (data.view_all_url) {
+          var catName = data.category_name || '';
+          var link = document.createElement('a');
+          link.className = 'view-all-link';
+          link.href = data.view_all_url;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.innerHTML = '🌐 View all' + (catName ? ' ' + esc(catName) : '') + ' businesses on HealthBizHub';
+          wrap.appendChild(link);
+        }
+        return wrap.children.length ? wrap : null;
+      }
       if (type === 'category_picker') return renderCategories(items);
       if (type === 'image_slider') return renderSlider(items);
       if (type === 'testimonial_cards') return renderTestimonials(items);
@@ -493,55 +523,68 @@
       return null;
     }
 
-    /* ===== CARDS ===== */
+    /* ===== CARDS GRID ===== */
     function makeCardEl(item) {
       var card = document.createElement('div');
       card.className = 'biz-card';
 
+      // Top row: circular avatar + meta (category | location)
+      var top = document.createElement('div');
+      top.className = 'biz-card-top';
+
+      var avatar = document.createElement('div');
+      avatar.className = 'biz-card-avatar';
+
       if (item.photo_url) {
         var img = document.createElement('img');
-        img.className = 'biz-card-img';
         img.alt = item.business_name || '';
         img.loading = 'lazy';
-        var ph = document.createElement('div');
-        ph.className = 'biz-card-img-ph';
-        ph.style.display = 'none';
-        ph.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2 3 3-4 4 5z"/></svg>';
-        img.onerror = function() { img.style.display = 'none'; ph.style.display = 'flex'; };
+        var svgPh = '<svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>';
+        img.onerror = function() { img.style.display = 'none'; avatar.innerHTML = svgPh; };
         img.src = item.photo_url;
-        card.appendChild(img);
-        card.appendChild(ph);
+        avatar.appendChild(img);
       } else {
-        var ph2 = document.createElement('div');
-        ph2.className = 'biz-card-img-ph';
-        ph2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2 3 3-4 4 5z"/></svg>';
-        card.appendChild(ph2);
+        avatar.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>';
       }
 
       var catLabel = item.specialty || item.category || '';
-      var badges = '';
-      if (item.is_verified) badges += '<span class="badge badge-verified">✓ Verified</span>';
-      if (item.is_featured) badges += '<span class="badge badge-featured">★ Featured</span>';
+      var metaTop = document.createElement('div');
+      metaTop.className = 'biz-card-meta-top';
+      metaTop.innerHTML =
+        (catLabel ? '<div class="cat-label">' + esc(catLabel) + '</div>' : '') +
+        (item.location ? '<div>' + esc(item.location) + '</div>' : '');
 
+      top.appendChild(avatar);
+      top.appendChild(metaTop);
+      card.appendChild(top);
+
+      // Body: name + description
       var body = document.createElement('div');
       body.className = 'biz-card-body';
       body.innerHTML =
         '<div class="biz-card-name">' + esc(item.business_name || '') + '</div>' +
-        '<div class="biz-card-meta">' +
-          (catLabel ? '<span>🏷 ' + esc(catLabel) + '</span>' : '') +
-          (item.location ? '<span>📍 ' + esc(item.location) + '</span>' : '') +
-        '</div>' +
-        (badges ? '<div class="badges">' + badges + '</div>' : '') +
         (item.description ? '<div class="biz-card-desc">' + esc(item.description) + '</div>' : '');
       card.appendChild(body);
 
+      // Badges
+      var badges = '';
+      if (item.is_verified) badges += '<span class="badge badge-verified">✓ Verified</span>';
+      if (item.is_featured) badges += '<span class="badge badge-featured">★ Featured</span>';
+      if (badges) {
+        var badgeWrap = document.createElement('div');
+        badgeWrap.className = 'badges';
+        badgeWrap.innerHTML = badges;
+        card.appendChild(badgeWrap);
+      }
+
+      // View Profile button
       if (item.profile_url) {
         var a = document.createElement('a');
         a.className = 'card-link';
         a.href = item.profile_url;
         a.target = '_blank';
         a.rel = 'noopener';
-        a.textContent = 'View Profile →';
+        a.textContent = 'View Profile';
         card.appendChild(a);
       }
       return card;
@@ -549,18 +592,33 @@
 
     function renderCards(items) {
       if (!items.length) return null;
-      var limited = items.slice(0, 10);
-      var idx = 0;
+      var limited = items.slice(0, 20);
+
+      // Group into pairs (2 cards per slide)
+      var slides = [];
+      for (var i = 0; i < limited.length; i += 2) {
+        slides.push(limited.slice(i, i + 2));
+      }
 
       var wrap = document.createElement('div');
       wrap.className = 'cards-slider-wrap';
 
       var track = document.createElement('div');
       track.className = 'cards-track';
-      limited.forEach(function(item) { track.appendChild(makeCardEl(item)); });
+
+      slides.forEach(function(pair) {
+        var slide = document.createElement('div');
+        slide.className = 'cards-slide';
+        var grid = document.createElement('div');
+        grid.className = 'cards-grid';
+        pair.forEach(function(item) { grid.appendChild(makeCardEl(item)); });
+        slide.appendChild(grid);
+        track.appendChild(slide);
+      });
       wrap.appendChild(track);
 
-      if (limited.length > 1) {
+      if (slides.length > 1) {
+        var idx = 0;
         var nav = document.createElement('div');
         nav.className = 'cards-nav';
 
@@ -571,7 +629,7 @@
 
         var counter = document.createElement('span');
         counter.className = 'cards-nav-count';
-        counter.textContent = '1 / ' + limited.length;
+        counter.textContent = '1 / ' + slides.length;
 
         var next = document.createElement('button');
         next.className = 'cards-nav-btn';
@@ -579,9 +637,9 @@
         next.setAttribute('aria-label', 'Next');
 
         function goTo(i) {
-          idx = (i + limited.length) % limited.length;
+          idx = (i + slides.length) % slides.length;
           track.style.transform = 'translateX(-' + (idx * 100) + '%)';
-          counter.textContent = (idx + 1) + ' / ' + limited.length;
+          counter.textContent = (idx + 1) + ' / ' + slides.length;
         }
 
         prev.addEventListener('click', function() { goTo(idx - 1); });
@@ -627,6 +685,10 @@
           card.appendChild(desc);
         }
         if (cat.specialties && cat.specialties.length) {
+          var specsLabel = document.createElement('div');
+          specsLabel.className = 'hbh-cat-specs-label';
+          specsLabel.textContent = 'Specialties available:';
+          card.appendChild(specsLabel);
           var specsDiv = document.createElement('div');
           specsDiv.className = 'hbh-cat-specs';
           cat.specialties.forEach(function(spec) {
@@ -647,23 +709,33 @@
     function renderSubCategories(items) {
       var wrap = document.createElement('div');
       wrap.className = 'hbh-sub-categories';
-      items.forEach(function(item) {
+
+      // "Show all" button first (full row)
+      var showAll = items.find(function(i) { return i.type === 'show_all'; });
+      if (showAll) {
+        var allBtn = document.createElement('button');
+        allBtn.className = 'hbh-show-all-btn';
+        allBtn.style.width = '100%';
+        allBtn.style.marginBottom = '4px';
+        allBtn.textContent = '🔎 Show all ' + (showAll.category || showAll.label || '') + ' businesses';
+        allBtn.addEventListener('click', function() {
+          sendText('Find ' + (showAll.category || showAll.label) + ' businesses');
+        });
+        wrap.appendChild(allBtn);
+      }
+
+      // Sub-specialty chips
+      var subItems = items.filter(function(i) { return i.type === 'sub_specialty'; });
+      subItems.forEach(function(item) {
         var btn = document.createElement('button');
-        if (item.type === 'show_all') {
-          btn.className = 'hbh-show-all-btn';
-          btn.textContent = '🔎 ' + (item.label || '');
-          btn.addEventListener('click', function() {
-            sendText('Find ' + (item.category || item.label) + ' businesses');
-          });
-        } else {
-          btn.className = 'hbh-spec-btn';
-          btn.textContent = item.label || '';
-          btn.addEventListener('click', function() {
-            sendText('Find ' + (item.label || '') + ' businesses');
-          });
-        }
+        btn.className = 'hbh-spec-btn';
+        btn.textContent = item.label || '';
+        btn.addEventListener('click', function() {
+          sendText('Browse ' + (item.label || '') + ' category');
+        });
         wrap.appendChild(btn);
       });
+
       return wrap;
     }
 
