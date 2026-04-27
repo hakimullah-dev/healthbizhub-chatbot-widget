@@ -552,7 +552,7 @@
             var tag = document.createElement('span');
             tag.className = 'hbh-spec-tag';
             tag.textContent = spec;
-            tag.addEventListener('click', function() { sendText('Browse ' + spec); });
+            tag.addEventListener('click', function() { sendText('Browse ' + spec + ' category'); });
             specsDiv.appendChild(tag);
           });
           card.appendChild(specsDiv);
