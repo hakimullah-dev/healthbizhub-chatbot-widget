@@ -482,6 +482,17 @@
       var rich = buildRich(data);
       if (rich) bubble.appendChild(rich);
 
+      if (data.cta_button && data.cta_button.url) {
+        var ctaA = document.createElement('a');
+        ctaA.className = 'view-all-link';
+        ctaA.href = data.cta_button.url;
+        ctaA.target = '_blank';
+        ctaA.rel = 'noopener';
+        ctaA.style.marginTop = '10px';
+        ctaA.textContent = data.cta_button.text || 'Get Started';
+        bubble.appendChild(ctaA);
+      }
+
       wrapper.appendChild(bubble);
       var t = document.createElement('div');
       t.className = 'msg-time';
