@@ -153,43 +153,59 @@
     }
     .hbh-typing-text { font-size: 12px; color: var(--text-muted); font-style: italic; }
 
-    /* ===== CARDS ===== */
-    .cards-wrap { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; width: 100%; }
+    /* ===== CARDS SLIDER ===== */
+    .cards-slider {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      margin-top: 8px;
+      padding-bottom: 6px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .cards-slider::-webkit-scrollbar { height: 3px; }
+    .cards-slider::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; opacity: 0.5; }
     .biz-card {
       background: var(--surface-2);
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       overflow: hidden;
       transition: border-color 0.2s, box-shadow 0.2s;
+      flex-shrink: 0;
+      width: 230px;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
     }
     .biz-card:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(0,188,212,0.15); }
-    .biz-card-img { width: 100%; height: 150px; object-fit: cover; display: block; background: #e2e8f0; }
+    .biz-card-img { width: 100%; height: 130px; object-fit: cover; display: block; background: #e2e8f0; flex-shrink: 0; }
     .biz-card-img-ph {
-      width: 100%; height: 150px;
+      width: 100%; height: 130px;
       background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
       display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-    .biz-card-img-ph svg { width: 40px; height: 40px; fill: #cbd5e1; }
-    .biz-card-body { padding: 12px 14px; }
-    .biz-card-name { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+    .biz-card-img-ph svg { width: 36px; height: 36px; fill: #cbd5e1; }
+    .biz-card-body { padding: 10px 12px; flex: 1; }
+    .biz-card-name { font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
     .biz-card-meta {
-      font-size: 12px; color: var(--text-muted);
-      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;
+      font-size: 11px; color: var(--text-muted);
+      display: flex; flex-direction: column; gap: 3px; margin-bottom: 5px;
     }
     .biz-card-desc {
-      font-size: 12px; color: var(--text-muted); line-height: 1.45;
+      font-size: 11px; color: var(--text-muted); line-height: 1.4;
       display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
-    .badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px; }
+    .badge { padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; }
     .badge-verified { background: #dcfce7; color: #16a34a; }
     .badge-featured { background: #fef3c7; color: #d97706; }
     .card-link {
       display: block; text-align: center; padding: 8px;
       background: rgba(0,188,212,0.07); color: var(--primary);
       text-decoration: none; font-size: 12px; font-weight: 700;
-      border-top: 1px solid var(--border); transition: background 0.2s;
+      border-top: 1px solid var(--border); transition: background 0.2s; margin-top: auto;
     }
     .card-link:hover { background: rgba(0,188,212,0.15); }
 
@@ -488,28 +504,58 @@
     function renderCards(items) {
       if (!items.length) return null;
       var wrap = document.createElement('div');
-      wrap.className = 'cards-wrap';
-      items.slice(0, 8).forEach(function(item) {
+      wrap.className = 'cards-slider';
+      items.slice(0, 10).forEach(function(item) {
         var card = document.createElement('div');
         card.className = 'biz-card';
-        var ph = '<div class="biz-card-img-ph"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2 3 3-4 4 5z"/></svg></div>';
-        var imgHtml = item.photo_url
-          ? '<img class="biz-card-img" src="' + escA(item.photo_url) + '" alt="' + escA(item.business_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' + '<div class="biz-card-img-ph" style="display:none"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2 3 3-4 4 5z"/></svg></div>'
-          : ph;
+
+        // Image: create elements properly to avoid onerror issues with innerHTML
+        var imgWrap = document.createElement('div');
+        if (item.photo_url) {
+          var img = document.createElement('img');
+          img.className = 'biz-card-img';
+          img.alt = item.business_name || '';
+          img.loading = 'lazy';
+          var ph2 = document.createElement('div');
+          ph2.className = 'biz-card-img-ph';
+          ph2.style.display = 'none';
+          ph2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2 3 3-4 4 5z"/></svg>';
+          img.onerror = function() { this.style.display = 'none'; ph2.style.display = 'flex'; };
+          img.src = item.photo_url;
+          imgWrap.appendChild(img);
+          imgWrap.appendChild(ph2);
+        } else {
+          imgWrap.className = 'biz-card-img-ph';
+          imgWrap.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2 3 3-4 4 5z"/></svg>';
+        }
+        card.appendChild(imgWrap);
+
+        // Body
+        var catLabel = item.specialty || item.category || '';
         var badges = '';
         if (item.is_verified) badges += '<span class="badge badge-verified">✓ Verified</span>';
         if (item.is_featured) badges += '<span class="badge badge-featured">★ Featured</span>';
-        card.innerHTML = imgHtml +
-          '<div class="biz-card-body">' +
-            '<div class="biz-card-name">' + esc(item.business_name || '') + '</div>' +
-            '<div class="biz-card-meta">' +
-              (item.category ? '<span>🏥 ' + esc(item.category) + '</span>' : '') +
-              (item.location ? '<span>📍 ' + esc(item.location) + '</span>' : '') +
-            '</div>' +
-            (badges ? '<div class="badges">' + badges + '</div>' : '') +
-            (item.description ? '<div class="biz-card-desc">' + esc(item.description) + '</div>' : '') +
+        var body = document.createElement('div');
+        body.className = 'biz-card-body';
+        body.innerHTML =
+          '<div class="biz-card-name">' + esc(item.business_name || '') + '</div>' +
+          '<div class="biz-card-meta">' +
+            (catLabel ? '<span>🏷 ' + esc(catLabel) + '</span>' : '') +
+            (item.location ? '<span>📍 ' + esc(item.location) + '</span>' : '') +
           '</div>' +
-          (item.profile_url ? '<a class="card-link" href="' + escA(item.profile_url) + '" target="_blank" rel="noopener">View Profile →</a>' : '');
+          (badges ? '<div class="badges">' + badges + '</div>' : '') +
+          (item.description ? '<div class="biz-card-desc">' + esc(item.description) + '</div>' : '');
+        card.appendChild(body);
+
+        if (item.profile_url) {
+          var a = document.createElement('a');
+          a.className = 'card-link';
+          a.href = item.profile_url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = 'View Profile →';
+          card.appendChild(a);
+        }
         wrap.appendChild(card);
       });
       return wrap;
