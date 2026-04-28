@@ -152,6 +152,17 @@
       30% { transform: scale(1.2); opacity: 1; }
     }
     .hbh-typing-text { font-size: 12px; color: var(--text-muted); font-style: italic; }
+    @keyframes blink-cursor {
+      0%,49% { opacity: 1; }
+      50%,100% { opacity: 0; }
+    }
+    .typewriter-cursor::after {
+      content: '▍';
+      font-size: 0.85em;
+      color: var(--primary);
+      animation: blink-cursor 0.6s infinite;
+      margin-left: 1px;
+    }
 
     /* ===== CARDS GRID ===== */
     .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
@@ -464,6 +475,23 @@
       scrollBottom();
     }
 
+    function typeText(el, text, speed, onDone) {
+      el.classList.add('typewriter-cursor');
+      var i = 0;
+      function tick() {
+        el.textContent = text.substring(0, i);
+        scrollBottom();
+        if (i < text.length) {
+          i++;
+          setTimeout(tick, speed);
+        } else {
+          el.classList.remove('typewriter-cursor');
+          if (onDone) onDone();
+        }
+      }
+      tick();
+    }
+
     function renderResponse(data) {
       var msgs = document.getElementById('chat-messages');
       var wrapper = document.createElement('div');
@@ -471,39 +499,46 @@
 
       var bubble = document.createElement('div');
       bubble.className = 'msg-bubble';
-
-      if (data.message) {
-        var p = document.createElement('div');
-        p.style.whiteSpace = 'pre-line';
-        p.textContent = data.message;
-        bubble.appendChild(p);
-      }
-
-      var rich = buildRich(data);
-      if (rich) bubble.appendChild(rich);
-
-      if (data.cta_button && data.cta_button.url) {
-        var ctaA = document.createElement('a');
-        ctaA.className = 'view-all-link';
-        ctaA.href = data.cta_button.url;
-        ctaA.target = '_blank';
-        ctaA.rel = 'noopener';
-        ctaA.style.marginTop = '10px';
-        ctaA.textContent = data.cta_button.text || 'Get Started';
-        bubble.appendChild(ctaA);
-      }
-
       wrapper.appendChild(bubble);
+
       var t = document.createElement('div');
       t.className = 'msg-time';
       t.textContent = now();
       wrapper.appendChild(t);
       msgs.appendChild(wrapper);
-
-      if (data.suggestions && data.suggestions.length) {
-        setSuggestions(data.suggestions);
-      }
       scrollBottom();
+
+      function showRichContent() {
+        var rich = buildRich(data);
+        if (rich) bubble.appendChild(rich);
+
+        if (data.cta_button && data.cta_button.url) {
+          var ctaA = document.createElement('a');
+          ctaA.className = 'view-all-link';
+          ctaA.href = data.cta_button.url;
+          ctaA.target = '_blank';
+          ctaA.rel = 'noopener';
+          ctaA.style.marginTop = '10px';
+          ctaA.textContent = data.cta_button.text || 'Get Started';
+          bubble.appendChild(ctaA);
+        }
+
+        if (data.suggestions && data.suggestions.length) {
+          setSuggestions(data.suggestions);
+        }
+        scrollBottom();
+      }
+
+      var msgText = data.message || '';
+      if (msgText) {
+        var p = document.createElement('div');
+        p.style.whiteSpace = 'pre-line';
+        bubble.appendChild(p);
+        var speed = msgText.length > 300 ? 6 : msgText.length > 150 ? 12 : 20;
+        typeText(p, msgText, speed, showRichContent);
+      } else {
+        showRichContent();
+      }
     }
 
     function buildRich(data) {
