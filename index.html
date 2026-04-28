@@ -265,16 +265,9 @@
     .slider-counter { font-size: 12px; color: var(--text-muted); }
 
     /* ===== TESTIMONIALS ===== */
-    .testimonials-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-    .testimonial-card {
-      background: white; border: 1.5px solid var(--border);
-      border-left: 3px solid var(--secondary);
-      border-radius: var(--radius-sm); padding: 10px 12px;
-    }
-    .testimonial-title { font-weight: 700; font-size: 13px; color: var(--secondary); margin-bottom: 4px; }
-    .testimonial-text { font-size: 12px; color: var(--text-muted); line-height: 1.45; margin-bottom: 5px; }
-    .testimonial-link { font-size: 11px; color: var(--primary); text-decoration: none; }
-    .testimonial-link:hover { text-decoration: underline; }
+    .testimonial-quote { font-size: 26px; color: var(--primary); padding: 10px 10px 0; opacity: 0.5; line-height: 1; }
+    .testimonial-title-sm { font-weight: 700; font-size: 11px; color: var(--primary-dark); padding: 2px 10px 0; }
+    .testimonial-desc { font-size: 10px; color: var(--text-muted); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 5; line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
 
     /* ===== LINKS ===== */
     .links-wrap { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
@@ -452,8 +445,14 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, session_id: SESSION })
       })
-        .then(function(r) { return r.json(); })
-        .then(function(d) { hideTyping(); renderResponse(d); })
+        .then(function(r) { return r.text(); })
+        .then(function(txt) {
+          var d;
+          try { d = JSON.parse(txt); } catch(e) {
+            d = { response_type: 'text', message: 'Sorry, I had trouble processing that. Please try again.', suggestions: ['Browse all categories', 'Search businesses'] };
+          }
+          hideTyping(); renderResponse(d);
+        })
         .catch(function() {
           hideTyping();
           renderResponse({ response_type: 'text', message: 'Sorry, I couldn\'t connect right now. Please try again.', suggestions: ['Browse all categories', 'Search businesses'] });
@@ -566,6 +565,7 @@
       if (type === 'links') return renderLinks(items);
       if (type === 'post_type_picker') return renderPostTypes(items, data);
       if (type === 'video_cards') return renderVideos(items);
+      if (type === 'specialty_cards') return renderSpecialties(items);
       return null;
     }
 
@@ -827,19 +827,89 @@
     }
 
     /* ===== TESTIMONIALS ===== */
+    function makeTestimonialCard(item) {
+      var card = document.createElement('div');
+      card.className = 'biz-card';
+
+      var quote = document.createElement('div');
+      quote.className = 'testimonial-quote';
+      quote.textContent = '❝';
+      card.appendChild(quote);
+
+      var title = document.createElement('div');
+      title.className = 'testimonial-title-sm';
+      title.textContent = item.title || 'Customer Review';
+      card.appendChild(title);
+
+      if (item.excerpt) {
+        var body = document.createElement('div');
+        body.className = 'biz-card-body';
+        var desc = document.createElement('div');
+        desc.className = 'testimonial-desc';
+        desc.textContent = item.excerpt;
+        body.appendChild(desc);
+        card.appendChild(body);
+      }
+
+      if (item.detail_url) {
+        var a = document.createElement('a');
+        a.className = 'card-link';
+        a.href = item.detail_url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = 'Read Full Review';
+        card.appendChild(a);
+      }
+      return card;
+    }
+
     function renderTestimonials(items) {
       if (!items.length) return null;
+      var limited = items.slice(0, 20);
+      var slides = [];
+      for (var i = 0; i < limited.length; i += 2) { slides.push(limited.slice(i, i + 2)); }
+
       var wrap = document.createElement('div');
-      wrap.className = 'testimonials-wrap';
-      items.slice(0, 10).forEach(function(item) {
-        var el = document.createElement('div');
-        el.className = 'testimonial-card';
-        el.innerHTML =
-          '<div class="testimonial-title">' + esc(item.title || 'Customer Review') + '</div>' +
-          '<div class="testimonial-text">' + esc((item.excerpt || '').substring(0, 250)) + '</div>' +
-          (item.detail_url ? '<a class="testimonial-link" href="' + escA(item.detail_url) + '" target="_blank" rel="noopener">Read more →</a>' : '');
-        wrap.appendChild(el);
+      wrap.className = 'cards-slider-wrap';
+      var track = document.createElement('div');
+      track.className = 'cards-track';
+
+      slides.forEach(function(pair) {
+        var slide = document.createElement('div');
+        slide.className = 'cards-slide';
+        var grid = document.createElement('div');
+        grid.className = 'cards-grid';
+        pair.forEach(function(item) { grid.appendChild(makeTestimonialCard(item)); });
+        slide.appendChild(grid);
+        track.appendChild(slide);
       });
+      wrap.appendChild(track);
+
+      if (slides.length > 1) {
+        var tidx = 0;
+        var tnav = document.createElement('div');
+        tnav.className = 'cards-nav';
+        var tprev = document.createElement('button');
+        tprev.className = 'cards-nav-btn';
+        tprev.innerHTML = '&#8249;';
+        var tcounter = document.createElement('span');
+        tcounter.className = 'cards-nav-count';
+        tcounter.textContent = '1 / ' + slides.length;
+        var tnext = document.createElement('button');
+        tnext.className = 'cards-nav-btn';
+        tnext.innerHTML = '&#8250;';
+        (function(track, slides, tcounter) {
+          function goTo(i) {
+            tidx = (i + slides.length) % slides.length;
+            track.style.transform = 'translateX(-' + (tidx * 100) + '%)';
+            tcounter.textContent = (tidx + 1) + ' / ' + slides.length;
+          }
+          tprev.addEventListener('click', function() { goTo(tidx - 1); });
+          tnext.addEventListener('click', function() { goTo(tidx + 1); });
+        })(track, slides, tcounter);
+        tnav.appendChild(tprev); tnav.appendChild(tcounter); tnav.appendChild(tnext);
+        wrap.appendChild(tnav);
+      }
       return wrap;
     }
 
@@ -891,6 +961,26 @@
         card.innerHTML = thumb +
           '<div class="biz-card-body"><div class="biz-card-name">' + esc(item.title || 'Video') + '</div></div>' +
           (item.video_url ? '<a class="card-link" href="' + escA(item.video_url) + '" target="_blank" rel="noopener">Watch Video →</a>' : '');
+        wrap.appendChild(card);
+      });
+      return wrap;
+    }
+
+    /* ===== SPECIALTY CARDS ===== */
+    function renderSpecialties(items) {
+      if (!items.length) return null;
+      var wrap = document.createElement('div');
+      wrap.className = 'cards-wrap';
+      items.forEach(function(item) {
+        var card = document.createElement('div');
+        card.className = 'biz-card';
+        var icon = '<div class="biz-card-img-ph"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>';
+        card.innerHTML = icon +
+          '<div class="biz-card-body">' +
+          '<div class="biz-card-name">' + esc(item.title || 'Specialty') + '</div>' +
+          (item.description ? '<div class="biz-card-desc">' + esc(item.description) + '</div>' : '') +
+          '</div>' +
+          (item.detail_url ? '<a class="card-link" href="' + escA(item.detail_url) + '" target="_blank" rel="noopener">View Profile →</a>' : '');
         wrap.appendChild(card);
       });
       return wrap;
