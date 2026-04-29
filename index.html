@@ -412,6 +412,7 @@
     var WEBHOOK = 'https://agents.metatitans.co.uk/proxy.php';
     var SESSION = 'hbh_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
     var busy = false;
+    var HISTORY = [];
 
     /* ===== INIT ===== */
     function init() {
@@ -448,16 +449,22 @@
       input.style.height = 'auto';
       clearSuggestions();
       showTyping();
+      HISTORY.push({ role: 'user', content: text });
+      if (HISTORY.length > 12) HISTORY = HISTORY.slice(-12);
       fetch(WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, session_id: SESSION })
+        body: JSON.stringify({ message: text, session_id: SESSION, history: HISTORY.slice(-10) })
       })
         .then(function(r) { return r.text(); })
         .then(function(txt) {
           var d;
           try { d = JSON.parse(txt); } catch(e) {
             d = { response_type: 'text', message: 'Sorry, I had trouble processing that. Please try again.', suggestions: ['Browse all categories', 'Search businesses'] };
+          }
+          if (d.message) {
+            HISTORY.push({ role: 'assistant', content: d.message });
+            if (HISTORY.length > 12) HISTORY = HISTORY.slice(-12);
           }
           hideTyping(); renderResponse(d);
         })
@@ -573,6 +580,7 @@
       if (type === 'post_type_picker') return renderPostTypes(items, data);
       if (type === 'video_cards') return renderVideos(items);
       if (type === 'specialty_cards') return renderSpecialties(items);
+      if (type === 'post_cards') return renderPostCards(items);
       return null;
     }
 
@@ -946,9 +954,9 @@
         var btn = document.createElement('button');
         btn.className = 'post-type-btn';
         btn.innerHTML = esc(item.label || item.value || '') + (item.count ? '<span class="post-count">' + item.count + '</span>' : '');
-        btn.addEventListener('click', function() {
-          sendText('Show ' + (item.label || item.value) + (bizName ? ' from ' + bizName : ''));
-        });
+        btn.addEventListener('click', (function(i) { return function() {
+          sendText('Show ' + (i.label || i.value) + ' from ' + bizName);
+        }; })(item));
         wrap.appendChild(btn);
       });
       return wrap;
@@ -983,6 +991,33 @@
         box.style.cssText = 'background:#f0fafa;border:1px solid #b2dfdf;border-radius:8px;padding:10px 14px;font-size:14px;font-weight:500;color:#1a6666;';
         box.textContent = item.title || 'Specialty';
         wrap.appendChild(box);
+      });
+      return wrap;
+    }
+
+    /* ===== POST CARDS (blog, news, events, promo offers, etc.) ===== */
+    function renderPostCards(items) {
+      if (!items.length) return null;
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-direction:column;gap:10px;margin-top:6px;';
+      items.forEach(function(item) {
+        var card = document.createElement('div');
+        card.style.cssText = 'background:#fff;border:1px solid #d9efef;border-radius:10px;overflow:hidden;';
+        var body = '';
+        if (item.image_url) {
+          body += '<img src="' + escA(item.image_url) + '" alt="" style="width:100%;height:120px;object-fit:cover;display:block;" onerror="this.style.display=\'none\'">';
+        }
+        body += '<div style="padding:10px 12px;">';
+        body += '<div style="font-size:14px;font-weight:600;color:#1a3333;margin-bottom:4px;">' + esc(item.title || 'Post') + '</div>';
+        if (item.excerpt) {
+          body += '<div style="font-size:13px;color:#555;line-height:1.4;">' + esc(item.excerpt) + '</div>';
+        }
+        if (item.detail_url) {
+          body += '<a href="' + escA(item.detail_url) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;color:#0d8080;font-weight:500;text-decoration:none;">Read more →</a>';
+        }
+        body += '</div>';
+        card.innerHTML = body;
+        wrap.appendChild(card);
       });
       return wrap;
     }
