@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var WEBHOOK_URL = 'http://82.25.104.70:5678/webhook/healthbizhub-chat';
-  var CSS_URL = 'https://your-cdn.com/widget.css'; // Update to your hosted CSS URL
+  var WEBHOOK_URL = 'https://agents.metatitans.co.uk/proxy.php';
+  var CSS_URL = 'https://hakimullah-dev.github.io/healthbizhub-chatbot-widget/widget.css';
 
   var sessionId = 'hbh_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   var isOpen = false;
